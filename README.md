@@ -1,0 +1,1 @@
+# rs-wc - Rust wc-like utilty
