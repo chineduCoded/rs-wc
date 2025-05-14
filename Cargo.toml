@@ -1,0 +1,15 @@
+[package]
+name = "rs-wc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.38", features = ["derive"] }
+memmap = "0.7.0"
+rayon = "1.10.0"
+serde_json = "1.0.140"
+thiserror = "2.0.12"
+
+[[bin]]
+name = "rs-wc"
+path = "src/main.rs"
