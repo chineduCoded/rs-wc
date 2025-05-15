@@ -9,6 +9,9 @@ use std::{
 use crate::error::{WcError, WcResult};
 use crate::parser::CountMode;
 
+use proptest::arbitrary::Arbitrary;
+use proptest::strategy::{Strategy, BoxedStrategy};
+
 #[derive(Debug, Default, Clone)]
 pub struct WcCounter {
     pub lines: usize,
@@ -37,6 +40,24 @@ impl WcCounter {
 impl std::ops::AddAssign<&WcCounter> for WcCounter {
     fn add_assign(&mut self, other: &WcCounter) {
         self.add_counts(other);
+    }
+}
+
+impl Arbitrary for WcCounter {
+    type Parameters = ();
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        (0..1000usize, 0..1000usize, 0..1000usize)
+            .prop_map(|(lines, words, bytes)| WcCounter { 
+                lines, 
+                words, 
+                bytes, 
+                chars: 0, 
+                max_line_length: 0, 
+                filename: None 
+            })
+            .boxed()
     }
 }
 
