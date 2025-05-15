@@ -47,7 +47,6 @@ mod error_tests {
     use std::io;
 
     #[test]
-    #[test]
     fn test_error_conversions() {
         let io_error = io::Error::new(io::ErrorKind::NotFound, "test error");
         let wc_error: WcError = io_error.into();
