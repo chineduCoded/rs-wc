@@ -53,6 +53,7 @@ mod error_tests {
         assert!(matches!(wc_error, WcError::Io(_)));
 
         // Use a truly invalid UTF-8 sequence
+        #[allow(invalid_from_utf8)]
         let utf8_error = std::str::from_utf8(&[0xC0, 0x80]).unwrap_err(); // Overlong encoding of NUL byte
         let wc_error: WcError = utf8_error.into();
         assert!(matches!(wc_error, WcError::Utf8(_)));
