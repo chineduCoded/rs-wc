@@ -40,3 +40,31 @@ impl WcError {
 
 
 pub type WcResult<T> = Result<T, WcError>;
+
+#[cfg(test)]
+mod error_tests {
+    use super::*;
+    use std::io;
+
+    #[test]
+    #[test]
+    fn test_error_conversions() {
+        let io_error = io::Error::new(io::ErrorKind::NotFound, "test error");
+        let wc_error: WcError = io_error.into();
+        assert!(matches!(wc_error, WcError::Io(_)));
+
+        // Use a truly invalid UTF-8 sequence
+        let utf8_error = std::str::from_utf8(&[0xC0, 0x80]).unwrap_err(); // Overlong encoding of NUL byte
+        let wc_error: WcError = utf8_error.into();
+        assert!(matches!(wc_error, WcError::Utf8(_)));
+    }
+
+    #[test]
+    fn test_custom_errors() {
+        let not_found = WcError::file_not_found("test.txt");
+        assert_eq!(not_found.to_string(), "File not found: test.txt");
+
+        let denied = WcError::permission_denied("/root/file");
+        assert_eq!(denied.to_string(), "Permission denied: /root/file");
+    }
+}
