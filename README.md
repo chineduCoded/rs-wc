@@ -29,12 +29,13 @@
 
 Basic usage:
 ```bash
-rs-wc <file1> <file2> ...
+rs-wc test.txt test_large.txt ...
 ```
 
 Example:
 ```bash
-rs-wc -l file.txt
+rs-wc -l t
+rs-wc -f json test.txt
 ```
 
 Using stdin:
