@@ -82,12 +82,16 @@ fn process_chunk(chunk: &[u8], initial_in_word: bool, initial_line_length: usize
     let mut current_line_length = initial_line_length;
 
     for &byte in chunk {
-        current_line_length += 1;
-        
         if byte == b'\n' {
-            partial.lines += 1;
+            // Capture length before the newline
             partial.max_line_length = partial.max_line_length.max(current_line_length);
+            partial.lines += 1;
             current_line_length = 0;
+        } else {
+            // Handle CR in Windows-style line endings: CRLF
+            if byte != b'\r' {
+                current_line_length += 1;
+            }
         }
         
         if byte.is_ascii_whitespace() {
@@ -101,6 +105,7 @@ fn process_chunk(chunk: &[u8], initial_in_word: bool, initial_line_length: usize
         }
     }
 
+    partial.max_line_length = partial.max_line_length.max(current_line_length);
     partial
 }
 

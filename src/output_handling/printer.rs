@@ -166,6 +166,12 @@ fn format_json(results: &[WcCounter], cli: &Cli) -> WcResult<String> {
 }
 
 pub fn format_results(results: &[WcCounter], cli: &Cli) -> WcResult<String> {
+    if cli.max_line_length && !cli.lines && !cli.words && !cli.bytes && !cli.chars {
+        return Ok(results.iter().map(|r| {
+            format!("{} {}\n", r.max_line_length, r.filename.as_deref().unwrap_or(""))
+        }).collect::<Vec<_>>().join("\n"));
+    }
+
     match cli.format {
         OutputFormat::Plain => Ok(build_output(results, cli, PlainFormatter)),
         OutputFormat::Human => Ok(build_output(results, cli, HumanFormatter)),
