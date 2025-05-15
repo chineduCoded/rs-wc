@@ -13,7 +13,7 @@
 1. Ensure you have [Rust](https://www.rust-lang.org/) installed.
 2. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/rs-wc.git
+    git clone https://github.com/chineduCoded/rs-wc.git
     cd rs-wc
     ```
 3. Build the project:
