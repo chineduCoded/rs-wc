@@ -11,6 +11,7 @@ use crate::parser::CountMode;
 
 use proptest::arbitrary::Arbitrary;
 use proptest::strategy::{Strategy, BoxedStrategy};
+use proptest::prelude::any;
 
 #[derive(Debug, Default, Clone)]
 pub struct WcCounter {
@@ -48,14 +49,27 @@ impl Arbitrary for WcCounter {
     type Strategy = BoxedStrategy<Self>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        (0..1000usize, 0..1000usize, 0..1000usize)
-            .prop_map(|(lines, words, bytes)| WcCounter { 
-                lines, 
-                words, 
-                bytes, 
-                chars: 0, 
-                max_line_length: 0, 
-                filename: None 
+        (
+            0..1000usize,    // lines
+            0..1000usize,    // words
+            0..1000usize,    // bytes
+            0..1000usize,    // chars
+            0..1000usize,    // max_line_length
+            proptest::option::of(any::<String>()) // filename
+        )
+            .prop_map(|(lines, words, bytes, chars, max_len, filename)| {
+                // Enforce invariants
+                let chars = chars.min(bytes);
+                let max_len = max_len.min(bytes);
+                
+                WcCounter { 
+                    lines, 
+                    words: words.max(lines), // At least 1 word per line
+                    bytes,
+                    chars,
+                    max_line_length: max_len,
+                    filename 
+                }
             })
             .boxed()
     }

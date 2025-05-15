@@ -54,5 +54,15 @@ mod proptests {
             assert_eq!(sum1.words, sum2.words);
             assert_eq!(sum1.bytes, sum2.bytes);
         }
+
+        #[test]
+        fn test_chars_never_exceed_bytes(counter in any::<WcCounter>()) {
+            assert!(counter.chars <= counter.bytes);
+        }
+
+        #[test]
+        fn test_lines_never_exceed_words(counter in any::<WcCounter>()) {
+            assert!(counter.lines <= counter.words);
+        }
     }
 }
