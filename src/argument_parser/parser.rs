@@ -83,3 +83,37 @@ impl Cli {
         }
     }
 }
+
+#[cfg(test)]
+mod cli_tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn test_cli_default_modes() {
+        let cli = Cli::parse_from(&["rs-wc"]);
+        let modes = cli.get_count_modes();
+        assert!(modes.contains(&CountMode::Lines));
+        assert!(modes.contains(&CountMode::Words));
+        assert!(modes.contains(&CountMode::Bytes));
+    }
+
+    #[test]
+    fn test_cli_specific_modes() {
+        let cli = Cli::parse_from(&["rs-wc", "-l", "-m"]);
+        let modes = cli.get_count_modes();
+        assert!(modes.contains(&CountMode::Lines));
+        assert!(!modes.contains(&CountMode::Words));
+        assert!(!modes.contains(&CountMode::Bytes));
+        assert!(modes.contains(&CountMode::Chars));
+    }
+
+    #[test]
+    fn test_cli_all_flag() {
+        let cli = Cli::parse_from(&["rs-wc", "-a"]);
+        let modes = cli.get_count_modes();
+        assert!(modes.contains(&CountMode::Lines));
+        assert!(modes.contains(&CountMode::Words));
+        assert!(modes.contains(&CountMode::Bytes));
+    }
+}
