@@ -34,7 +34,7 @@ rs-wc <file1> <file2> ...
 
 Example:
 ```bash
-rs-wc file.txt
+rs-wc -l file.txt
 ```
 
 Using stdin:
