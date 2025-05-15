@@ -154,3 +154,81 @@ pub fn count_files<P: AsRef<Path> + Sync>(
         .map(|path| count_file(path, modes))
         .collect()
 }
+
+
+#[cfg(test)]
+mod counter_tests {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn test_wc_counter() {
+        let counter = WcCounter::new();
+        assert_eq!(counter.lines, 0);
+        assert_eq!(counter.words, 0);
+        assert_eq!(counter.bytes, 0);
+        assert_eq!(counter.chars, 0);
+        assert_eq!(counter.max_line_length, 0);
+        assert!(counter.filename.is_none());
+    }
+
+    #[test]
+    fn test_wc_counter_add_assign() {
+        let mut counter1 = WcCounter {
+            lines: 10,
+            words: 20,
+            bytes: 30,
+            chars: 40,
+            max_line_length: 50,
+            filename: Some("file11".to_string()),
+        };
+
+        let counter2 = WcCounter {
+            lines: 5,
+            words: 15,
+            bytes: 25,
+            chars: 35,
+            max_line_length: 60,
+            filename: Some("file2".to_string()),
+        };
+
+        counter1 += &counter2;
+        assert_eq!(counter1.lines, 15);
+        assert_eq!(counter1.words, 35);
+        assert_eq!(counter1.bytes, 55);
+        assert_eq!(counter1.chars, 75);
+        assert_eq!(counter1.max_line_length, 60);
+        assert_eq!(counter1.filename, Some("file11".to_string()));
+    }
+
+    #[test]
+    fn test_count_reader_empty() {
+        let reader = Cursor::new(b"");
+        let result = count_reader(reader, None, &[CountMode::Lines]).unwrap();
+        assert_eq!(result.lines, 0);
+    }
+
+    #[test]
+    fn test_count_reader_basic() {
+        let text = "Hello world\nThis is a test\n";
+        let reader = Cursor::new(text);
+        let result = count_reader(reader, None, &[CountMode::Lines, CountMode::Words]).unwrap();
+        
+        assert_eq!(result.lines, 2);
+        assert_eq!(result.words, 6);
+    }
+
+    #[test]
+    fn test_count_bytes_unicode() {
+        let text = "こんにちは世界\n"; // "Hello world" in Japanese
+        let result = count_bytes(text.as_bytes(), None, &[CountMode::Chars]).unwrap();
+        
+        assert_eq!(result.chars, 8); // 7 characters + newline
+    }
+
+    #[test]
+    fn test_count_file_not_found() {
+        let result = count_file("/nonexistent/file", &[CountMode::Chars]);
+        assert!(matches!(result, Err(WcError::FileNotFound(_))));
+    }
+}
