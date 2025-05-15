@@ -172,3 +172,92 @@ pub fn format_results(results: &[WcCounter], cli: &Cli) -> WcResult<String> {
         OutputFormat::Json => format_json(results, cli),
     }
 }
+
+#[cfg(test)]
+mod printer_tests {
+    use super::*;
+    use crate::counter::WcCounter;
+    use crate::parser::{Cli, OutputFormat};
+
+    fn create_test_counter() -> WcCounter {
+        WcCounter {
+            lines: 10,
+            words: 20,
+            bytes: 30,
+            chars: 40,
+            max_line_length: 50,
+            filename: Some("test.txt".to_string()),
+        }
+    }
+
+    #[test]
+    fn test_format_plain_single() {
+        let counter = create_test_counter();
+        let cli = Cli {
+            lines: true,
+            words: true,
+            bytes: true,
+            ..Cli::default()
+        };
+        
+        let output = build_output(&[counter], &cli, PlainFormatter);
+        assert_eq!(output.trim(), "10 20 30 test.txt");
+    }
+
+    #[test]
+    fn test_format_plain_multiple() {
+        let counter1 = create_test_counter();
+        let counter2 = WcCounter {
+            lines: 5,
+            words: 10,
+            bytes: 15,
+            chars: 20,
+            max_line_length: 25,
+            filename: Some("test2.txt".to_string()),
+        };
+        
+        let cli = Cli {
+            lines: true,
+            words: true,
+            ..Cli::default()
+        };
+        
+        let output = build_output(&[counter1, counter2], &cli, PlainFormatter);
+        let lines: Vec<&str> = output.trim().lines().collect();
+        
+        assert_eq!(lines.len(), 3);
+        assert!(lines[0].contains("test.txt"));
+        assert!(lines[1].contains("test2.txt"));
+        assert!(lines[2].contains("total"));
+    }
+
+    #[test]
+    fn test_format_human() {
+        let counter = create_test_counter();
+        let cli = Cli {
+            lines: true,
+            words: true,
+            format: OutputFormat::Human,
+            ..Cli::default()
+        };
+        
+        let output = build_output(&[counter], &cli, HumanFormatter);
+        assert!(output.contains("lines: 10"));
+        assert!(output.contains("words: 20"));
+        assert!(output.contains("in test.txt"));
+    }
+
+    #[test]
+    fn test_format_json() {
+        let counter = create_test_counter();
+        let cli = Cli {
+            lines: true,
+            format: OutputFormat::Json,
+            ..Cli::default()
+        };
+        
+        let output = format_json(&[counter], &cli).unwrap();
+        assert!(output.contains("\"lines\": 10"));
+        assert!(output.contains("\"filename\": \"test.txt\""));
+    }
+}
